@@ -9,7 +9,8 @@
     "predev": "convex dev --until-success && node setup.mjs --once && convex dashboard",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "get-admin-key": "node scripts/get-admin-key.mjs"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
