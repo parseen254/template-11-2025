@@ -1,0 +1,331 @@
+# Agent Orchestration Manifest
+# Defines how multiple AI agents coordinate to implement a feature
+
+# Metadata
+name: [FEATURE_NAME]-orchestrator
+description: Coordinates feature implementation across specialized agents
+feature_id: [FEATURE_ID]  # e.g., 001-chat-system
+version: 1.0.0
+
+# Subagent Definitions
+subagents:
+  # Backend Agent - Handles Convex backend implementation
+  - name: convex-backend-agent
+    role: Implements Convex queries, mutations, actions, and schema
+    description: Specialized in Convex backend development with type-safe functions
+    
+    context_files:
+      - .cursor/rules/convex_rules.mdc
+      - convex/schema.ts
+      - convex/_generated/api.d.ts
+      - specs/[FEATURE_ID]/plan.md
+      - specs/[FEATURE_ID]/data-model.md
+    
+    skills:
+      - convex
+      - typescript
+      - backend
+      - database-design
+      - api-design
+    
+    responsibilities:
+      - Define database schema in convex/schema.ts
+      - Implement queries with proper validators
+      - Implement mutations with proper validators
+      - Implement actions when external APIs needed
+      - Follow convex_rules.mdc guidelines
+      - Write unit tests for all functions
+    
+    output_directories:
+      - convex/
+    
+    mcp_servers:
+      - convex  # Can query existing Convex data
+    
+    constitution_focus:
+      - Type safety (strict validators)
+      - Performance (efficient queries)
+      - Security (input validation)
+
+  # Frontend Agent - Handles Next.js/React implementation
+  - name: nextjs-frontend-agent
+    role: Implements React components, pages, and UI logic
+    description: Specialized in Next.js 15 with React 19, Tailwind CSS, and Radix UI
+    
+    context_files:
+      - app/**/*.tsx
+      - components/**/*.tsx
+      - convex/_generated/api.d.ts  # For type-safe Convex calls
+      - specs/[FEATURE_ID]/plan.md
+      - specs/[FEATURE_ID]/spec.md
+    
+    skills:
+      - react
+      - nextjs
+      - typescript
+      - tailwind
+      - radix-ui
+      - frontend
+      - accessibility
+    
+    responsibilities:
+      - Implement React components following project patterns
+      - Use Convex hooks (useQuery, useMutation, useAction)
+      - Implement responsive design with Tailwind
+      - Ensure accessibility (ARIA labels, keyboard navigation)
+      - Follow React 19 best practices
+      - Write component tests
+    
+    output_directories:
+      - app/
+      - components/
+    
+    mcp_servers:
+      - convex  # Can test queries during development
+    
+    constitution_focus:
+      - User experience (responsive, accessible)
+      - Code reusability (component composition)
+      - Type safety (TypeScript strict mode)
+
+  # Test Agent - Handles test generation and execution
+  - name: test-agent
+    role: Generates and runs tests for backend and frontend
+    description: Implements contract tests, integration tests, and e2e tests
+    
+    context_files:
+      - convex/**/*.ts
+      - app/**/*.tsx
+      - components/**/*.tsx
+      - specs/[FEATURE_ID]/spec.md
+      - specs/[FEATURE_ID]/contracts/
+    
+    skills:
+      - testing
+      - jest
+      - playwright
+      - tdd
+      - contract-testing
+    
+    responsibilities:
+      - Generate contract tests before implementation
+      - Generate integration tests for Convex functions
+      - Generate component tests for React components
+      - Generate e2e tests for critical user flows
+      - Run tests and report failures
+      - Maintain test coverage above 80%
+    
+    output_directories:
+      - convex/**/*.test.ts
+      - app/**/*.test.tsx
+      - components/**/*.test.tsx
+      - e2e/
+    
+    mcp_servers:
+      - convex
+    
+    constitution_focus:
+      - Test coverage (minimum 80%)
+      - Test quality (meaningful assertions)
+      - Contract adherence
+
+# Coordination Configuration
+coordination:
+  protocol: convex-realtime
+  state_table: agent_coordination
+  status_update_interval: 5000  # milliseconds
+  conflict_resolution: primary-agent-decides
+  
+  # How agents communicate
+  communication:
+    - type: convex-mutation
+      function: internal.agentCoordination.updateStatus
+    - type: convex-subscription
+      function: internal.agentCoordination.subscribeToAgents
+
+# Workflow Definition
+workflow:
+  # Phase -1: Contract Definition (Sequential)
+  - phase: contracts
+    description: Define function contracts before implementation
+    parallel: false
+    agents:
+      - convex-backend-agent
+    tasks:
+      - Define Convex function signatures in contracts/
+      - Generate TypeScript types
+      - Create failing contract tests
+    outputs:
+      - contracts/convex/*.ts
+      - convex/**/*.test.ts (failing)
+    success_criteria:
+      - All function signatures defined
+      - All contract tests fail (no implementation yet)
+    
+  # Phase 0: Schema Definition (Sequential)
+  - phase: schema
+    description: Define database schema
+    parallel: false
+    depends_on: [contracts]
+    agents:
+      - convex-backend-agent
+    tasks:
+      - Implement convex/schema.ts
+      - Define tables with validators
+      - Define indexes
+    outputs:
+      - convex/schema.ts
+    success_criteria:
+      - Schema passes validation
+      - All entities from data-model.md represented
+
+  # Phase 1: Parallel Implementation
+  - phase: implementation
+    description: Implement backend and frontend concurrently
+    parallel: true
+    depends_on: [schema]
+    agents:
+      - convex-backend-agent
+      - nextjs-frontend-agent
+    tasks:
+      backend:
+        - Implement Convex queries
+        - Implement Convex mutations
+        - Implement Convex actions (if needed)
+        - Make contract tests pass
+      frontend:
+        - Implement React components
+        - Implement pages
+        - Integrate Convex hooks
+        - Implement UI logic
+    outputs:
+      backend:
+        - convex/**/*.ts
+      frontend:
+        - app/**/*.tsx
+        - components/**/*.tsx
+    success_criteria:
+      backend:
+        - All contract tests pass
+        - All functions have validators
+        - Code follows convex_rules.mdc
+      frontend:
+        - All user stories have UI
+        - Responsive design implemented
+        - Accessibility requirements met
+
+  # Phase 2: Testing (Sequential after implementation)
+  - phase: testing
+    description: Generate and run comprehensive tests
+    parallel: false
+    depends_on: [implementation]
+    agents:
+      - test-agent
+    tasks:
+      - Generate integration tests
+      - Generate component tests
+      - Generate e2e tests
+      - Run full test suite
+      - Generate coverage report
+    outputs:
+      - convex/**/*.test.ts
+      - app/**/*.test.tsx
+      - components/**/*.test.tsx
+      - e2e/**/*.spec.ts
+      - coverage/
+    success_criteria:
+      - All tests pass
+      - Coverage above 80%
+      - All user stories have e2e tests
+
+  # Phase 3: Integration & Polish (Sequential)
+  - phase: integration
+    description: Final integration and polish
+    parallel: false
+    depends_on: [testing]
+    agents:
+      - convex-backend-agent
+      - nextjs-frontend-agent
+    tasks:
+      - Fix any integration issues
+      - Performance optimization
+      - Accessibility audit
+      - Code review checklist
+    outputs:
+      - Updated implementation files
+      - IMPLEMENTATION.md summary
+    success_criteria:
+      - All acceptance scenarios pass
+      - Performance benchmarks met
+      - Constitution compliance verified
+
+# Monitoring & Observability
+monitoring:
+  metrics:
+    - agent_status_updates
+    - phase_completion_time
+    - test_pass_rate
+    - conflict_count
+    - lines_of_code_generated
+  
+  alerts:
+    - type: agent_blocked
+      condition: status == 'blocked' for > 60 seconds
+      action: notify_primary_agent
+    
+    - type: phase_timeout
+      condition: phase duration > estimated_time * 2
+      action: request_user_intervention
+    
+    - type: test_failure
+      condition: test_pass_rate < 80%
+      action: pause_and_investigate
+
+# Conflict Resolution Rules
+conflict_resolution:
+  # When two agents modify the same file
+  - scenario: file_modification_conflict
+    rule: last_write_wins_with_review
+    action:
+      - Detect conflicting changes
+      - Create conflict report
+      - Primary agent reviews and merges
+  
+  # When agents disagree on implementation
+  - scenario: implementation_disagreement
+    rule: constitution_decides
+    action:
+      - Review against constitution
+      - Choose approach that best aligns
+      - Document decision in plan.md
+  
+  # When tests fail after integration
+  - scenario: integration_test_failure
+    rule: pause_and_fix
+    action:
+      - Pause further development
+      - Responsible agent fixes issue
+      - Re-run tests before continuing
+
+# Success Criteria (Overall)
+success_criteria:
+  - all_phases_completed: true
+  - all_tests_passing: true
+  - constitution_compliance: true
+  - user_stories_implemented: "100%"
+  - code_coverage: ">80%"
+  - performance_benchmarks_met: true
+  - accessibility_audit_passed: true
+
+# Notes
+notes: |
+  This manifest defines the orchestration of multiple AI agents working
+  together to implement a feature. The primary orchestrator agent reads
+  this manifest and coordinates the subagents according to the workflow.
+  
+  Key principles:
+  1. Contract-first: Define contracts before implementation
+  2. Parallel work: Backend and frontend work simultaneously
+  3. Real-time coordination: Agents communicate via Convex
+  4. Constitution-driven: All decisions align with project principles
+  5. Test-driven: Tests guide and validate implementation
