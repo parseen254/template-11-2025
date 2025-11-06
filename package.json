@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm-run-all --parallel dev:frontend dev:backend",
+    "dev": "npm-run-all --parallel dev:frontend dev:backend mailhog:start",
     "dev:frontend": "next dev --turbopack",
     "dev:backend": "convex dev",
     "predev": "convex dev --until-success && node setup.mjs --once && convex dashboard",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "get-admin-key": "node scripts/get-admin-key.mjs"
+    "get-admin-key": "node scripts/get-admin-key.mjs",
+    "mailhog:start": "docker-compose up -d mailhog"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
@@ -39,6 +40,7 @@
     "@modelcontextprotocol/sdk": "^0.6.0",
     "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "^20.19.24",
+    "@types/nodemailer": "^7.0.3",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "dotenv": "^16.6.1",

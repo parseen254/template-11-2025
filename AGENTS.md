@@ -5,6 +5,25 @@
 
 ---
 
+## ⚠️ CRITICAL RULES - READ FIRST
+
+### Documentation Files
+**ABSOLUTELY FORBIDDEN** to create documentation files (README.md, CHANGELOG.md, CONTRIBUTING.md, etc.) unless **EXPLICITLY** requested by the user. This includes:
+- ❌ Summary files of changes made
+- ❌ Documentation of implemented features
+- ❌ Markdown files explaining your work
+- ❌ Any kind of "here's what I did" documents
+
+**ONLY create documentation files when the user specifically says:**
+- "Create a README"
+- "Document this feature"
+- "Write documentation for..."
+- Or similar explicit requests
+
+When you finish work, simply report what you did in the chat. NO FILES.
+
+---
+
 ## Purpose
 
 This file provides comprehensive guidelines for AI agents working on this project. It covers:
