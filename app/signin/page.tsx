@@ -9,7 +9,9 @@ import { toast, Toaster } from "sonner";
 import { useState } from "react";
 
 export default function SignInPage() {
-  const [step, setStep] = useState<"signIn" | "linkSent">("signIn");
+  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
+  const { signIn } = useAuthActions();
+
 
   return (
     <div className="flex min-h-screen w-full container my-auto mx-auto">
@@ -19,69 +21,42 @@ export default function SignInPage() {
             <h2 className="font-semibold text-2xl tracking-tight">
               Sign in or create an account
             </h2>
-            <SignInWithGitHub />
-            <SignInMethodDivider />
-            <SignInWithMagicLink handleLinkSent={() => setStep("linkSent")} />
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                void signIn("email-otp", formData).then(() =>
+                  setStep({ email: formData.get("email") as string })
+                );
+              }}
+            >
+              <input name="email" placeholder="Email" type="text" />
+              <button type="submit">Send code</button>
+            </form>
           </>
         ) : (
           <>
             <h2 className="font-semibold text-2xl tracking-tight">
               Check your email
             </h2>
-            <p>A sign-in link has been sent to your email address.</p>
-            <Button
-              className="p-0 self-start"
-              variant="link"
-              onClick={() => setStep("signIn")}
+            <p>A sign-in code has been sent to your email address.</p>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                void signIn("email-otp", formData);
+              }}
             >
-              Cancel
-            </Button>
+              <input name="code" placeholder="Code" type="text" />
+              <input name="email" value={step.email} type="hidden" />
+              <button type="submit">Continue</button>
+              <button type="button" onClick={() => setStep("signIn")}>
+                Cancel
+              </button>
+            </form>
           </>
         )}
       </div>
     </div>
-  );
-}
-
-function SignInWithGitHub() {
-  const { signIn } = useAuthActions();
-  return (
-    <Button
-      className="flex-1"
-      variant="outline"
-      type="button"
-      onClick={() => void signIn("github", { redirectTo: "/product" })}
-    >
-      <GitHubLogoIcon className="mr-2 h-4 w-4" /> GitHub
-    </Button>
-  );
-}
-
-function SignInWithMagicLink({
-  handleLinkSent,
-}: {
-  handleLinkSent: () => void;
-}) {
-  const { signIn } = useAuthActions();
-  return (
-    <form
-      className="flex flex-col"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        formData.set("redirectTo", "/product");
-        signIn("resend", formData)
-          .then(handleLinkSent)
-          .catch((error) => {
-            console.error(error);
-            toast.error("Could not send sign-in link");
-          });
-      }}
-    >
-      <label htmlFor="email">Email</label>
-      <Input name="email" id="email" className="mb-4" autoComplete="email" />
-      <Button type="submit">Send sign-in link</Button>
-      <Toaster />
-    </form>
   );
 }

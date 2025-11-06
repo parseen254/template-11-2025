@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as EmailOTP from "../EmailOTP.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as messages from "../messages.js";
@@ -28,6 +29,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  EmailOTP: typeof EmailOTP;
   auth: typeof auth;
   http: typeof http;
   messages: typeof messages;

@@ -10,10 +10,13 @@ importers:
     dependencies:
       '@auth/core':
         specifier: ^0.37.4
-        version: 0.37.4
+        version: 0.37.4(nodemailer@7.0.10)
       '@convex-dev/auth':
         specifier: ^0.0.77
-        version: 0.0.77(@auth/core@0.37.4)(convex@1.28.2(react@19.2.0))(react@19.2.0)
+        version: 0.0.77(@auth/core@0.37.4(nodemailer@7.0.10))(convex@1.28.2(react@19.2.0))(react@19.2.0)
+      '@oslojs/crypto':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -47,6 +50,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      nodemailer:
+        specifier: ^7.0.10
+        version: 7.0.10
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2312,6 +2318,10 @@ packages:
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
 
+  nodemailer@7.0.10:
+    resolution: {integrity: sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==}
+    engines: {node: '>=6.0.0'}
+
   normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
 
@@ -2875,17 +2885,19 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@auth/core@0.37.4':
+  '@auth/core@0.37.4(nodemailer@7.0.10)':
     dependencies:
       '@panva/hkdf': 1.2.1
       jose: 5.10.0
       oauth4webapi: 3.8.2
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
+    optionalDependencies:
+      nodemailer: 7.0.10
 
-  '@convex-dev/auth@0.0.77(@auth/core@0.37.4)(convex@1.28.2(react@19.2.0))(react@19.2.0)':
+  '@convex-dev/auth@0.0.77(@auth/core@0.37.4(nodemailer@7.0.10))(convex@1.28.2(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@auth/core': 0.37.4
+      '@auth/core': 0.37.4(nodemailer@7.0.10)
       arctic: 1.9.2
       convex: 1.28.2(react@19.2.0)
       cookie: 1.0.2
@@ -5026,6 +5038,8 @@ snapshots:
       - babel-plugin-macros
 
   nice-try@1.0.5: {}
+
+  nodemailer@7.0.10: {}
 
   normalize-package-data@2.5.0:
     dependencies:
