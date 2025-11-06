@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { render } from "@react-email/render";
+import OTPVerificationEmail from "@/emails/OTPVerification";
+import React from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +19,27 @@ export async function POST(req: Request) {
     const body = (await req.json()) as {
       to?: string;
       subject?: string;
-      text?: string;
+      verificationCode?: string;
+      expiryMinutes?: number;
     };
 
-    if (!body?.to || !body?.subject || !body?.text) {
+    if (!body?.to || !body?.subject || !body?.verificationCode) {
       return NextResponse.json(
-        { error: "Missing required fields: to, subject, text" },
+        { error: "Missing required fields: to, subject, verificationCode" },
         { status: 400 }
       );
     }
+
+    // Render the React Email template to HTML
+    const emailHtml = await render(
+      React.createElement(OTPVerificationEmail, {
+        verificationCode: body.verificationCode,
+        expiryMinutes: body.expiryMinutes || 15,
+      })
+    );
+
+    // Render plain text version (fallback)
+    const emailText = `Your Verification Code: ${body.verificationCode}\n\nThis code will expire in ${body.expiryMinutes || 15} minutes.\n\nIf you didn't request this code, you can safely ignore this email.`;
 
     // Create transporter using environment variables
     const transporter = nodemailer.createTransport({
@@ -40,18 +55,20 @@ export async function POST(req: Request) {
           : undefined,
     });
 
-    // Send email
+    // Send email with both HTML and text versions
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM || "noreply@localhost",
       to: body.to,
       subject: body.subject,
-      text: body.text,
+      text: emailText,
+      html: emailHtml,
     });
 
     console.log("Email sent:", {
       messageId: info.messageId,
       to: body.to,
       subject: body.subject,
+      verificationCode: body.verificationCode,
     });
 
     return NextResponse.json(

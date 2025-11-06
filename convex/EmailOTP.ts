@@ -28,8 +28,9 @@ export const EmailOTP = Email({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 to: email,
-                subject: "Your verification code",
-                text: `Your verification code is: ${token}\n\nThis code will expire in 15 minutes.`,
+                subject: "Your Verification Code",
+                verificationCode: token,
+                expiryMinutes: 15,
             }),
         });
 
