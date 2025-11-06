@@ -12,18 +12,48 @@ After the initial setup (<2 minutes) you'll have a working full-stack app using:
 
 ## Get started
 
+### Quick Start (Convex Cloud)
+
 If you just cloned this codebase and didn't use `npm create convex`, run:
 
-```
+```bash
 npm install
 npm run dev
 ```
 
 If you're reading this README on GitHub and want to use this template, run:
 
-```
+```bash
 npm create convex@latest -- -t nextjs-convexauth-shadcn
 ```
+
+### Self-Hosted Development Setup
+
+To run the Convex backend locally using Docker:
+
+1. **Start Backend Services** (Convex Backend + Dashboard + MailHog):
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Copy Environment Variables**:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+3. **Start Next.js** (runs on host, not in Docker):
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+4. **Access Services**:
+   - Next.js App: http://localhost:3000
+   - Convex Dashboard: http://localhost:6791
+   - MailHog UI: http://localhost:8025
+   - Convex API: http://localhost:3210
+
+**Why Next.js runs on host:** The official Convex self-hosted pattern runs backend services in Docker while keeping Next.js on the host for faster development, hot reload, and proper environment variable handling.
 
 ## The app
 
